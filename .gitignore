@@ -1,0 +1,56 @@
+#env
+.env
+*.env
+
+# --- Ambientes Virtuais ---
+venv/
+venv_ia/
+env/
+.venv/
+bin/
+include/
+lib/
+share/
+
+# --- Python & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+.pip-log
+.templateengine
+
+# --- Pandas & Data Science ---
+# Não suba bases de dados pesadas ou temporárias
+*.csv
+*.xlsx
+*.parquet
+*.sqlite
+.ipynb_checkpoints/
+
+# --- Selenium & Drivers ---
+# Drivers costumam ser baixados automaticamente, não precisam de Git
+chromedriver
+chromedriver.exe
+geckodriver
+geckodriver.exe
+ghostdriver.log
+
+# --- IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
