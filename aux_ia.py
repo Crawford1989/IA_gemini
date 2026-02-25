@@ -7,24 +7,33 @@ class FallBack:
     def __init__(self, api_key):
         self.client_ia = genai.Client(api_key=api_key)
         self.model_ia = "gemini-3-flash-preview"
+        # self.modo="thinking" ligar o thinking aumenta token mas deixa mais esperto
         
-    def encontrar_novo_xpath(self, html_parcial, descricao_elemento):
+    def encontrar_novo_xpath(self, html_parcial, descricao_elemento, url, titulo, acao):
         prompt = f"""
         CONTEXTO:
         Você é um especialista em automação com Selenium. O XPath atual falhou.
-        
+
+        INFORMAÇÕES DA PÁGINA:
+        URL: {url}
+        TÍTULO: {titulo}
+        TIPO DE AÇÃO: {acao}
+
         TAREFA:
-        Analise o trecho de HTML fornecido abaixo e encontre o XPath para o elemento: '{descricao_elemento}'.
-        
+        Analise o HTML abaixo e encontre o XPath mais robusto para o elemento:
+        '{descricao_elemento}'.
+
+        Considere que a ação a ser executada é: {acao}.
+        O XPath deve priorizar elementos visíveis e interativos.
+
         HTML PARA ANÁLISE:
         {html_parcial}
-        
-        PROCESSO DE PENSAMENTO (THINKING):
-        1. Localize todos os elementos que correspondem à descrição.
-        2. Identifique se existem duplicatas (elementos com mesmos atributos).
-        3. Ignore elementos que pareçam estar escondidos (ex: dentro de áreas invisíveis ou com atributos de ocultação).
-        4. Se houver mais de um, use índices como '(//tag[@attr="val"])[2]' para garantir o clique no correto.
-        5. Priorize XPaths robustos, mas específicos o suficiente para evitar ambiguidade.
+
+        REGRAS:
+        1. Evite XPaths frágeis baseados em índices absolutos.
+        2. Priorize atributos estáveis como id, name, aria-label, texto visível.
+        3. Se houver duplicidade, utilize índice apenas se necessário.
+        4. Considere o contexto da URL e título para entender a finalidade da página.
 
         RESPOSTA OBRIGATÓRIA EM JSON:
         {{

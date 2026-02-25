@@ -21,11 +21,24 @@ def gerenciar_config(acao, chave, valor=None):
             json.dump(dados, f, indent=4)
             print(f"💾 Novo XPath salvo no JSON para a chave '{chave}'!")
             
-            
+def validar_elemento(el):
+    try:
+        texto = el.get_attribute("value") or el.text
+        name = el.get_attribute("name")
+        type_ = el.get_attribute("type")
+
+        if name == "btnI" and type_ == "submit" and "sorte" in texto.lower():
+            return True
+
+        return False
+    except:
+        return False
+    
 
 def iniciar_robo():
     options = uc.ChromeOptions()
     driver = uc.Chrome(options=options)
+    driver.maximize_window()
     
   
     verificador = FallBack(api_key=os.getenv("GEMINI_API_KEY")) 
@@ -41,25 +54,40 @@ def iniciar_robo():
         try:
            
             elementos = driver.find_elements("xpath", xpath_atual)
+
             clicou_sucesso = False
-            
+            url_antes = driver.current_url
+            titulo_antes = driver.title
+
             for el in elementos:
-                if el.is_displayed() and el.is_enabled():
+                if el.is_displayed() and el.is_enabled() and validar_elemento(el):
                     el.click()
-                    print("✅ Sucesso ao clicar no botão de primeira!")
-                    clicou_sucesso = True
-                    break
-            
-            
+                    time.sleep(2)
+
+                    # valida efeito
+                    if driver.current_url != url_antes or driver.title != titulo_antes:
+                        print("✅ Clique validado com sucesso.")
+                        clicou_sucesso = True
+                        break
+                    else:
+                        print("⚠️ Clique não gerou efeito esperado.")
+
             if not clicou_sucesso:
-                raise NoSuchElementException("Elemento existe mas não está visível")
+                raise NoSuchElementException("Elemento não confiável ou sem efeito")
         
         except (NoSuchElementException, ElementNotInteractableException):
             print("\n🚨 O XPath do JSON falhou! Iniciando Autocura...")
             
             
             html_snapshot = driver.page_source[:20000]
-            resultado = verificador.encontrar_novo_xpath(html_snapshot, "Botão 'Estou com sorte'")
+            
+            resultado = verificador.encontrar_novo_xpath(
+            html_parcial=html_snapshot,
+            descricao_elemento="Botão 'Estou com sorte'",
+            url=driver.current_url,
+            titulo=driver.title,
+            acao="click"
+            )
             
             if "novo_xpath" in resultado:
                 novo_xpath = resultado["novo_xpath"]
